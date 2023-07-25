@@ -13,8 +13,8 @@ namespace QLSV
 {
     public partial class Form1 : Form
     {
-        string flag; // Nhận biết button thêm hay sửa
-        DataTable dtSV, dtMH;
+        string flag, flagMH; // Nhận biết button thêm hay sửa
+        public DataTable dtSV, dtMH;
         int index, indexMH;
         public Form1()
         {
@@ -43,9 +43,11 @@ namespace QLSV
             // page2
 
             txtTenMH.ReadOnly = true;
+            txtMaLop.ReadOnly = true;
             txtMaMH.ReadOnly = true;
             txtSoTC.ReadOnly = true;
             txtCN.ReadOnly = true;
+            txtGV.ReadOnly = true;
 
 
             btnThem.Focus();
@@ -71,9 +73,11 @@ namespace QLSV
             txtLop.ReadOnly = false;
 
             txtTenMH.ReadOnly = false;
+            txtMaLop.ReadOnly = false;
             txtMaMH.ReadOnly = false;
             txtSoTC.ReadOnly = false;
             txtCN.ReadOnly = false;
+            txtGV.ReadOnly = false;
 
 
             txtMaSV.Focus();
@@ -151,11 +155,11 @@ namespace QLSV
             if (flag == "add") {
                 if (CheckData())
                 {
-                    dtSV.Rows.Add(txtMaSV.Text, txtTenSV.Text, cboSex.SelectedItem, txtLop.Text);
+                    dtSV.Rows.Add(txtMaSV.Text, txtTenSV.Text, cboSex.Text, txtLop.Text);
                     dataGridSinhVien.DataSource = dtSV;
                     dataGridSinhVien.RefreshEdit();
                 }
-                LockControlSV();
+               // LockControlSV();
             }
             else if (flag == "edit")
             {
@@ -169,7 +173,7 @@ namespace QLSV
                     dataGridSinhVien.RefreshEdit();
                 }
             }
-
+            LockControlSV();
         }
         private void btnXoa_Click(object sender, EventArgs e)
         {
@@ -215,25 +219,34 @@ namespace QLSV
 
         private void dataGridSinhVien_SelectionChanged_1(object sender, EventArgs e)
         {
-            try
-            {
-                if (dataGridSinhVien.CurrentRow != null && dataGridSinhVien.DataSource is DataTable dt1)
-                {
-                    index = dataGridSinhVien.CurrentCell.RowIndex;
+            //try
+            //{
+            //    if (dataGridSinhVien.CurrentRow != null && dataGridSinhVien.DataSource is DataTable dt1)
+            //    {
+            //        index = dataGridSinhVien.CurrentCell.RowIndex;
 
-                    if (dt1.Rows.Count > 0 && index < dt1.Rows.Count)
-                    {
-                        txtMaSV.Text = dt1.Rows[index]["MaSV"].ToString();
-                        txtTenSV.Text = dt1.Rows[index]["TenSV"].ToString();
-                        cboSex.Text = dt1.Rows[index]["Sex"].ToString();
-                        txtLop.Text = dt1.Rows[index]["Lop"].ToString();
-                    }
-                }
-            }
-            catch (Exception ex)
+            //        if (dt1.Rows.Count > 0 && index < dt1.Rows.Count)
+            //        {
+            //            txtMaSV.Text = dt1.Rows[index]["MaSV"].ToString();
+            //            txtTenSV.Text = dt1.Rows[index]["TenSV"].ToString();
+            //            cboSex.Text = dt1.Rows[index]["Sex"].ToString();
+            //            txtLop.Text = dt1.Rows[index]["Lop"].ToString();
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show("Lỗi    1: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    // Ghi log chi tiết lỗi nếu cần
+            //}
+
+            index = dataGridSinhVien.CurrentCell == null ? -1 : dataGridSinhVien.CurrentCell.RowIndex;
+            if (index != -1) 
             {
-                MessageBox.Show("Lỗi    1: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Ghi log chi tiết lỗi nếu cần
+                txtMaSV.Text = dataGridSinhVien.Rows[index].Cells[0].Value.ToString();
+                txtTenSV.Text = dataGridSinhVien.Rows[index].Cells[1].Value.ToString();
+                cboSex.Text = dataGridSinhVien.Rows[index].Cells[2].Value.ToString();
+                txtLop.Text = dataGridSinhVien.Rows[index].Cells[3].Value.ToString();
             }
         }
 
@@ -298,6 +311,8 @@ namespace QLSV
 
         }
 
+
+
         /// <summary>
         /// Design Page 2
         /// Quản lý môn học
@@ -308,18 +323,20 @@ namespace QLSV
         private void btnThem1_Click(object sender, EventArgs e)
         {
             UnlockControlSV();
-            flag = "add";
+            flagMH = "add";
 
             txtMaMH.Text = "";
+            txtMaLop.Text = "";
             txtTenMH.Text = "";
             txtCN.Text = "";
             txtSoTC.Text = "";
+            txtGV.Text = "";
         }
 
         private void btnSua1_Click(object sender, EventArgs e)
         {
             UnlockControlSV();
-            flag = "edit";
+            flagMH = "edit";
 
         }
 
@@ -336,61 +353,42 @@ namespace QLSV
         public DataTable CreateTable1() {
             DataTable dt = new DataTable();
             dt.Columns.Add("MaMH");
+            dt.Columns.Add("MaLop");
             dt.Columns.Add("TenMH");
             dt.Columns.Add("SoTC");
             dt.Columns.Add("CN");
+            dt.Columns.Add("GV");
 
             return dt;
         }
         private void btnLuu1_Click(object sender, EventArgs e)
         {
-            if (flag == "add")
+            if (flagMH == "add")
             {
                 if (CheckData1())
                 {
-                    dtMH.Rows.Add(txtMaMH.Text, txtTenMH.Text, txtSoTC.Text, txtCN.Text);
+                    dtMH.Rows.Add(txtMaMH.Text,txtMaLop.Text, txtTenMH.Text, txtSoTC.Text, txtCN.Text, txtGV.Text);
                     dataGridMH.DataSource = dtMH;
                     dataGridMH.RefreshEdit();
                 }
-                LockControlSV();
+        
             }
-            else if (flag == "edit")
+            else if (flagMH == "edit")
             {
                 if (CheckData1())
                 {
-                    dtMH.Rows[index][0] = txtMaMH.Text;
-                    dtMH.Rows[index][1] = txtTenMH.Text;
-                    dtMH.Rows[index][2] = txtSoTC.Text;
-                    dtMH.Rows[index][3] = txtCN.Text;
+                    dtMH.Rows[indexMH][0] = txtMaMH.Text;
+                    dtMH.Rows[indexMH][1] = txtMaLop.Text;
+                    dtMH.Rows[indexMH][2] = txtTenMH.Text;
+                    dtMH.Rows[indexMH][3] = txtSoTC.Text;
+                    dtMH.Rows[indexMH][4] = txtCN.Text;
+                    dtMH.Rows[indexMH][5] = txtGV.Text;
                     dataGridMH.DataSource = dtMH;
                     dataGridMH.RefreshEdit();
                 }
-                LockControlSV();
+                //LockControlSV();
             }
-        }
-
-        private void dataGridMH_SelectionChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                if (dataGridMH.CurrentRow != null && dataGridMH.DataSource is DataTable dt1)
-                {
-                    indexMH = dataGridMH.CurrentCell.RowIndex;
-
-                    if (dt1.Rows.Count > 0 && indexMH < dt1.Rows.Count)
-                    {
-                        txtMaMH.Text = dt1.Rows[index]["MaMH"].ToString();
-                        txtTenMH.Text = dt1.Rows[index]["TenMH"].ToString();
-                        txtSoTC.Text = dt1.Rows[index]["SoTC"].ToString();
-                        txtCN.Text = dt1.Rows[index]["CN"].ToString();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Bản ghi: " + ex.Message, "Cảnh Báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                // Ghi log chi tiết lỗi nếu cần
-            }
+            LockControlSV();
         }
 
         private void dataGridMH_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -398,14 +396,18 @@ namespace QLSV
 
         }
 
-    
-
         public bool CheckData1()
         {
             if (string.IsNullOrEmpty(txtMaMH.Text))
             {
                 MessageBox.Show("Bạn chưa nhập Mã Môn Học!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 txtMaMH.Focus();
+                return false;
+            }
+            if (string.IsNullOrEmpty(txtMaLop.Text))
+            {
+                MessageBox.Show("Bạn chưa nhập Mã Lớp!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtMaLop.Focus();
                 return false;
             }
 
@@ -427,8 +429,29 @@ namespace QLSV
                 txtCN.Focus();
                 return false;
             }
+            if (string.IsNullOrEmpty(txtGV.Text))
+            {
+                MessageBox.Show("Bạn chưa nhập Giáo Vien!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtGV.Focus();
+                return false;
+            }
 
             return true;
+        }
+
+        private void dataGridMH_SelectionChanged(object sender, EventArgs e)
+        {
+            indexMH = dataGridMH.CurrentCell == null ? -1 : dataGridMH.CurrentCell.RowIndex;
+
+            if (indexMH != -1)
+            {
+                txtMaMH.Text = dataGridMH.Rows[indexMH].Cells[0].Value.ToString();
+                txtMaLop.Text = dataGridMH.Rows[indexMH].Cells[1].Value.ToString();
+                txtTenMH.Text = dataGridMH.Rows[indexMH].Cells[2].Value.ToString();
+                txtSoTC.Text = dataGridMH.Rows[indexMH].Cells[3].Value.ToString();
+                txtCN.Text = dataGridMH.Rows[indexMH].Cells[4].Value.ToString();
+                txtGV.Text = dataGridMH.Rows[indexMH].Cells[5].Value.ToString();
+            }
         }
 
         public void SaveDataMH(DataTable dt)
@@ -456,31 +479,43 @@ namespace QLSV
             FileStream fs = new FileStream("dataMH.txt", FileMode.Open, FileAccess.Read);
             StreamReader sr = new StreamReader(fs);
             string str = sr.ReadLine();
-            string maMH, tenMH, soTC, CN;
+            string maMH,maLop, tenMH, soTC, CN, GV;
 
             while (str != null)
             {
-                try
-                {
+                //try
+                //{
                     string[] tmp = str.Split('\t');
 
                     maMH = tmp[0];
-                    tenMH = tmp[1];
-                    soTC = tmp[2];
-                    CN = tmp[3];
-                    dt.Rows.Add(maMH, tenMH, soTC, CN);
+                    maLop = tmp[1];
+                    tenMH = tmp[2];
+                    soTC = tmp[3];
+                    CN = tmp[4];
+                    GV = tmp[5];
+                    dt.Rows.Add(maMH,maLop, tenMH, soTC, CN, GV);
 
                     str = sr.ReadLine();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Lỗi data SinhVien: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    MessageBox.Show("Lỗi data mon hoc PAGE 2: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //}
             }
             sr.Close();
             fs.Close();
             return dt;
         }
+
+        /// <summary>
+        /// page 3
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnDangKi_Click(object sender, EventArgs e)
+        {
+            FormDangKiMonHoc frm = new FormDangKiMonHoc();
+            frm.ShowDialog();
+        }
     }
-        
 }
