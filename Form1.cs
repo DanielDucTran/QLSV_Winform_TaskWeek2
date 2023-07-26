@@ -16,11 +16,18 @@ namespace QLSV
         string flag, flagMH; // Nhận biết button thêm hay sửa
         public DataTable dtSV, dtMH;
         int index, indexMH;
+        /// <summary>
+        /// List luu tru danh sach mon hoc dang ki
+        /// </summary>
+        List<Object> dsMHDK = new List<object>();
+        HashSet<Object> uniqueValues = new HashSet<Object>();
+
         public Form1()
         {
             InitializeComponent();
         }
-        public void LockControlSV() {
+        public void LockControlSV()
+        {
 
             //Page1
             btnThem.Enabled = true;
@@ -112,7 +119,7 @@ namespace QLSV
         private void Form1_Load(object sender, EventArgs e)
         {
             LockControlSV();
-
+            //dataGridDSDangKi.DataSource = FormDangKiMonHoc.dsMH;
 
             try
             {
@@ -128,6 +135,9 @@ namespace QLSV
                 dtSV = CreateTable();
                 dtMH = CreateTable1();
             }
+
+            LoadDanhSachMonHoc();
+            ReadDataMHDK();
 
         }
 
@@ -152,14 +162,15 @@ namespace QLSV
 
         private void btnLuu_Click(object sender, EventArgs e)
         {
-            if (flag == "add") {
+            if (flag == "add")
+            {
                 if (CheckData())
                 {
                     dtSV.Rows.Add(txtMaSV.Text, txtTenSV.Text, cboSex.Text, txtLop.Text);
                     dataGridSinhVien.DataSource = dtSV;
                     dataGridSinhVien.RefreshEdit();
                 }
-               // LockControlSV();
+                // LockControlSV();
             }
             else if (flag == "edit")
             {
@@ -241,7 +252,7 @@ namespace QLSV
             //}
 
             index = dataGridSinhVien.CurrentCell == null ? -1 : dataGridSinhVien.CurrentCell.RowIndex;
-            if (index != -1) 
+            if (index != -1)
             {
                 txtMaSV.Text = dataGridSinhVien.Rows[index].Cells[0].Value.ToString();
                 txtTenSV.Text = dataGridSinhVien.Rows[index].Cells[1].Value.ToString();
@@ -250,7 +261,8 @@ namespace QLSV
             }
         }
 
-        public void SaveData(DataTable dt) {
+        public void SaveData(DataTable dt)
+        {
 
             FileStream fs = new FileStream("data1.txt", FileMode.OpenOrCreate, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs);
@@ -311,8 +323,6 @@ namespace QLSV
 
         }
 
-
-
         /// <summary>
         /// Design Page 2
         /// Quản lý môn học
@@ -350,7 +360,8 @@ namespace QLSV
             }
         }
 
-        public DataTable CreateTable1() {
+        public DataTable CreateTable1()
+        {
             DataTable dt = new DataTable();
             dt.Columns.Add("MaMH");
             dt.Columns.Add("MaLop");
@@ -367,11 +378,11 @@ namespace QLSV
             {
                 if (CheckData1())
                 {
-                    dtMH.Rows.Add(txtMaMH.Text,txtMaLop.Text, txtTenMH.Text, txtSoTC.Text, txtCN.Text, txtGV.Text);
+                    dtMH.Rows.Add(txtMaMH.Text, txtMaLop.Text, txtTenMH.Text, txtSoTC.Text, txtCN.Text, txtGV.Text);
                     dataGridMH.DataSource = dtMH;
                     dataGridMH.RefreshEdit();
                 }
-        
+
             }
             else if (flagMH == "edit")
             {
@@ -479,23 +490,23 @@ namespace QLSV
             FileStream fs = new FileStream("dataMH.txt", FileMode.Open, FileAccess.Read);
             StreamReader sr = new StreamReader(fs);
             string str = sr.ReadLine();
-            string maMH,maLop, tenMH, soTC, CN, GV;
+            string maMH, maLop, tenMH, soTC, CN, GV;
 
             while (str != null)
             {
                 //try
                 //{
-                    string[] tmp = str.Split('\t');
+                string[] tmp = str.Split('\t');
 
-                    maMH = tmp[0];
-                    maLop = tmp[1];
-                    tenMH = tmp[2];
-                    soTC = tmp[3];
-                    CN = tmp[4];
-                    GV = tmp[5];
-                    dt.Rows.Add(maMH,maLop, tenMH, soTC, CN, GV);
+                maMH = tmp[0];
+                maLop = tmp[1];
+                tenMH = tmp[2];
+                soTC = tmp[3];
+                CN = tmp[4];
+                GV = tmp[5];
+                dt.Rows.Add(maMH, maLop, tenMH, soTC, CN, GV);
 
-                    str = sr.ReadLine();
+                str = sr.ReadLine();
                 //}
                 //catch (Exception ex)
                 //{
@@ -512,10 +523,75 @@ namespace QLSV
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnDangKi_Click(object sender, EventArgs e)
+
+        private void LoadDanhSachMonHoc()
         {
-            FormDangKiMonHoc frm = new FormDangKiMonHoc();
-            frm.ShowDialog();
+            try
+            {
+                dtMH = ReadDataMH();
+                dataGridDKMH.DataSource = dtMH;
+            }
+            catch (Exception)
+            {
+                dtMH = CreateTable1();
+            }
         }
+        public void ReadDataMHDK()
+        {
+            FileStream fs = new FileStream("dataMH.txt", FileMode.Open, FileAccess.Read);
+            StreamReader sr = new StreamReader(fs);
+            string str = sr.ReadLine();
+            string maMH, tenMH;
+            while (str != null)
+            {
+                //try
+                //{
+                string[] tmp = str.Split('\t');
+
+                maMH = tmp[0];
+                tenMH = tmp[2];
+                string mhdk = "[" + maMH + "] " + "[" + tenMH + "]";
+                Course dsMHDK = new Course(mhdk);
+                cboMHDK.Items.Add(dsMHDK);
+
+                str = sr.ReadLine();
+                //}
+                //catch (Exception ex)
+                //{
+                //    MessageBox.Show("Lỗi data mon hoc PAGE 2: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //}
+            }
+            sr.Close();
+            fs.Close();
+        }
+        
+        public void CheckDangKyMonHoc()
+        {
+            dsMHDK.Add(cboMHDK.SelectedItem);
+            bool hasDuplicates = false;
+            foreach (var item in dsMHDK)
+            {
+                if (uniqueValues.Add(item))
+                {
+                    hasDuplicates = true;
+                    break;
+                }
+            }
+            if (hasDuplicates)
+            {
+                MessageBox.Show("Đăng kí học phần thành công!", "SUCCESS!");
+            }
+            else
+            {
+                MessageBox.Show("Học phần này đã được đăng kí!", "Lỗi!!!");
+            }
+        }
+        private void btnDangKy_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Bạn muốn đăng ký học phần: " + cboMHDK.SelectedItem + " ", "xác nhận đăng ký", MessageBoxButtons.YesNo, MessageBoxIcon.Question );
+            CheckDangKyMonHoc();
+
+        }
+    
     }
 }
